@@ -1,0 +1,19 @@
+# Dockerfile.airflow
+
+# 1. Start with the official Airflow image
+FROM apache/airflow:2.7.1
+
+# 2. Switch to 'root' user to install system tools (like git)
+USER root
+RUN apt-get update && \
+    apt-get install -y git && \
+    apt-get clean
+
+# 3. Switch back to 'airflow' user to install Python libraries
+USER airflow
+
+# 4. Copy your requirements.txt file into the image
+COPY requirements.txt /requirements.txt
+
+# 5. Install the libraries (Pandas, Sklearn, DVC, etc.)
+RUN pip install --no-cache-dir -r /requirements.txt

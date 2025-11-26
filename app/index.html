@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI House Price Predictor</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 400px; }
+        h2 { text-align: center; color: #333; }
+        label { display: block; margin-top: 10px; font-weight: 600; color: #555; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; background-color: #4CAF50; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 16px; margin-top: 20px; cursor: pointer; transition: 0.3s; }
+        button:hover { background-color: #45a049; }
+        #result { margin-top: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; color: #333; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏡 House Price Estimator</h2>
+    
+    <label>Area (sq ft)</label>
+    <input type="number" id="area" value="5000">
+
+    <label>Bedrooms</label>
+    <input type="number" id="bedrooms" value="3">
+
+    <label>Bathrooms</label>
+    <input type="number" id="bathrooms" value="2">
+
+    <label>Stories</label>
+    <select id="stories">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+    </select>
+
+    <label>Furnishing Status</label>
+    <select id="furnishing">
+        <option value="furnished">Furnished</option>
+        <option value="semi-furnished">Semi-Furnished</option>
+        <option value="unfurnished">Unfurnished</option>
+    </select>
+
+    <label>Main Road?</label>
+    <select id="mainroad"><option value="yes">Yes</option><option value="no">No</option></select>
+
+    <label>Has Guestroom?</label>
+    <select id="guestroom"><option value="yes">Yes</option><option value="no" selected>No</option></select>
+
+    <label>Has Basement?</label>
+    <select id="basement"><option value="yes">Yes</option><option value="no" selected>No</option></select>
+    
+    <label>Hot Water Heating?</label>
+    <select id="hotwater"><option value="yes">Yes</option><option value="no" selected>No</option></select>
+
+    <label>Air Conditioning?</label>
+    <select id="ac"><option value="yes">Yes</option><option value="no" selected>No</option></select>
+
+    <label>Preferred Area?</label>
+    <select id="prefarea"><option value="yes">Yes</option><option value="no" selected>No</option></select>
+
+    <label>Parking Spots</label>
+    <input type="number" id="parking" value="1">
+
+    <button onclick="predictPrice()">💰 Predict Price</button>
+    
+    <div id="result"></div>
+</div>
+
+<script>
+    async function predictPrice() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.textContent = "Calculating...";
+        resultDiv.className = "";
+
+        // 1. Gather Data
+        const payload = {
+            area: Number(document.getElementById('area').value),
+            bedrooms: Number(document.getElementById('bedrooms').value),
+            bathrooms: Number(document.getElementById('bathrooms').value),
+            stories: Number(document.getElementById('stories').value),
+            mainroad: document.getElementById('mainroad').value,
+            guestroom: document.getElementById('guestroom').value,
+            basement: document.getElementById('basement').value,
+            hotwaterheating: document.getElementById('hotwater').value,
+            airconditioning: document.getElementById('ac').value,
+            parking: Number(document.getElementById('parking').value),
+            prefarea: document.getElementById('prefarea').value,
+            furnishingstatus: document.getElementById('furnishing').value
+        };
+
+        try {
+            // 2. Send Request to API
+            const response = await fetch('http://127.0.0.1:8000/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            // 3. Handle Response
+            if (response.ok) {
+                const data = await response.json();
+                // Format as currency
+                const price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.predicted_price);
+                resultDiv.innerHTML = `Estimated Price: <span style="color: green">${price}</span>`;
+            } else {
+                const err = await response.json();
+                resultDiv.textContent = "Error: " + (err.detail || "Unknown error");
+                resultDiv.className = "error";
+            }
+        } catch (error) {
+            resultDiv.textContent = "Failed to connect to API. Is it running?";
+            resultDiv.className = "error";
+        }
+    }
+</script>
+
+</body>
+</html>
