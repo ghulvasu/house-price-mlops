@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn
+dvc[s3]
+mlflow
+fastapi
+uvicorn
+boto3
+pyyaml
+matplotlib
+seaborn 
