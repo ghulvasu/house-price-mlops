@@ -17,7 +17,7 @@ def preprocess_data():
 
     # 2. REMOVE OUTLIERS
     # ----------------------------------------------------------------
-    # We remove houses more expensive than 9.2 Million (based on your EDA)
+    # We remove houses more expensive than 9.2 Million
     outlier_cutoff = 9205000
     df = df[df['price'] <= outlier_cutoff]
     
@@ -42,22 +42,20 @@ def preprocess_data():
 
     # 4. SPLIT DATA (TRAIN vs TEST)
     # ----------------------------------------------------------------
-    # We must split BEFORE scaling to avoid "cheating" (Data Leakage)
     train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
 
     # 5. SCALE FEATURES (0 to 1)
     # ----------------------------------------------------------------
-    # We want to scale these columns so they match the 0-1 range of our binary columns
+    # Only scale the original numerical columns
     cols_to_scale = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking']
     
     scaler = MinMaxScaler()
 
-    # CRITICAL: We fit the scaler ONLY on the Training data
-    # Then we use that same math to transform the Test data
+    # Fit on Train, Transform on Test
     train_df[cols_to_scale] = scaler.fit_transform(train_df[cols_to_scale])
     test_df[cols_to_scale] = scaler.transform(test_df[cols_to_scale])
 
-    print("✅ Scaling Completed (Area, Bedrooms, etc. are now between 0 and 1)")
+    print("✅ Scaling Completed")
 
     # 6. SAVE PROCESSED FILES
     # ----------------------------------------------------------------
@@ -69,9 +67,8 @@ def preprocess_data():
     train_df.to_csv(train_path, index=False)
     test_df.to_csv(test_path, index=False)
 
-    print(f"\nSUCCESS: Files saved to 'data/processed/'")
-    print(f"Training Data: {len(train_df)} rows")
-    print(f"Testing Data:  {len(test_df)} rows")
+    print(f"\nSUCCESS: Reverted to standard preprocessing.")
+    print(f"Train set saved: {len(train_df)} rows")
 
 if __name__ == "__main__":
     preprocess_data()
